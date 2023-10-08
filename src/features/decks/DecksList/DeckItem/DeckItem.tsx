@@ -1,18 +1,49 @@
 import s from './DeckItem.module.css'
+import { Deck } from '../../../../features/decks/decks-api'
+import { useAppDispatch } from '../../../../app/store'
+import { deleteDeckTC, updateDeckTC } from '../../../../features/decks/decks-thunks'
+import { ChangeEvent, useState } from 'react'
+
 
 type DeckProps = {
-  deck: any // todo: fix
+  deck: Deck[] // todo: fix
+  id: string
 }
 
-const TEST_ACC_NAME = 'v1det'
+const TEST_ACC_NAME = 'test'
 
-export const DeckItem = ({ deck }: DeckProps) => {
+export const DeckItem = ({ deck, id }: DeckProps) => {
+  const dispatch = useAppDispatch()
   const isTestingDeck = deck.author.name === TEST_ACC_NAME
+  let [editMode, setEditMode] = useState<boolean>(false)
+  let [title, setTitle] = useState<string>(deck.name)
+  //dispatch(updateDeckTC(deck.name, id))
+  const updateDeck = () => {
+    setEditMode(true)
+  }
+
+  const deleteDeck = () => {
+    dispatch(deleteDeckTC(id))
+  }
+
+  const editDeckTitle = (e: ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.currentTarget.value)
+  }
+
+  const saveNewDeckTitle = () => {
+    dispatch(updateDeckTC(title, id))
+    setEditMode(false)
+  }
 
   return (
     <li className={s.item}>
       <h3 className={s.title}>
-        {deck.name}
+        {editMode
+        ? <div>
+            <input value={title} onChange={editDeckTitle}/>
+            <button onClick={saveNewDeckTitle}>Save</button>
+        </div>
+        : deck.name}
         {isTestingDeck && '✨'}
       </h3>
       <p className={s.characteristic}>
@@ -27,8 +58,8 @@ export const DeckItem = ({ deck }: DeckProps) => {
 
       {isTestingDeck && (
         <div className={s.buttonBox}>
-          <button>update</button>
-          <button>delete</button>
+          <button onClick={updateDeck}>update</button>
+          <button onClick={deleteDeck}>delete</button>
         </div>
       )}
     </li>
